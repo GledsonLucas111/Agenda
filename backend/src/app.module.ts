@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './app/users/users.module';
-import { ScheduleModule } from './app/schedule/schedule.module';
+import { UsersModule } from './users/users.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [UsersModule, ScheduleModule],
