@@ -2,20 +2,20 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { PrismaService } from 'src/database/services/prisma.service';
-import { Prisma, Users } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateUserDto): Promise<Users> {
+  async create(dto: CreateUserDto): Promise<User> {
     try {
-      const data: Prisma.UsersCreateInput = {
+      const data: Prisma.UserCreateInput = {
         ...dto,
         password: await bcrypt.hash(dto.password, 10),
       };
-      const createUser = await this.prisma.users.create({ data });
+      const createUser = await this.prisma.user.create({ data });
 
       return createUser;
     } catch (error) {
@@ -29,30 +29,30 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<Users[]> {
-    return await this.prisma.users.findMany();
+  async findAll(): Promise<User[]> {
+    return await this.prisma.user.findMany();
   }
 
   findById(id: number) {
-    return this.prisma.users.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
   findByEmail(email: string) {
-    return this.prisma.users.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   async update(id: number, updateDto: UpdateUserDto) {
-    const data: Prisma.UsersUpdateInput = {
+    const data: Prisma.UserUpdateInput = {
       ...updateDto,
     };
 
-    return await this.prisma.users.update({
+    return await this.prisma.user.update({
       where: { id },
       data,
     });
   }
 
   remove(id: number) {
-    return this.prisma.users.delete({ where: { id } });
+    return this.prisma.user.delete({ where: { id } });
   }
 }
