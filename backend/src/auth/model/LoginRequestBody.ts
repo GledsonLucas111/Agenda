@@ -8,7 +8,7 @@ export class LoginRequestBody {
   @MinLength(4)
   @MaxLength(20)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'Password too weak',
+    message: 'The password is incorrect',
   })
   password: string;
 }
