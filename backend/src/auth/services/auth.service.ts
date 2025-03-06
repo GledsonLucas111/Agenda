@@ -9,6 +9,7 @@ import { UserToken } from '../model/UserToken';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/services/user.service';
 
+import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<UserToken> {
     try {
-      const user = await this.validateUser(email, password);
+      const user = await this.validateUser(email.toLowerCase(), password);
 
       const payload: UserPayload = {
         username: user.email,
@@ -51,5 +52,16 @@ export class AuthService {
       );
     }
     throw new Error('Email address or password provided is incorrect.');
+  }
+
+  decoded(token: string) {
+    try {
+      if (!token) console.log('Token não pode estar vazio!');
+
+      const decoded = jwt.verify(token, '123456WASD');
+      return decoded;
+    } catch (erro: any) {
+      console.error('Erro ao verificar o token:', erro.message);
+    }
   }
 }

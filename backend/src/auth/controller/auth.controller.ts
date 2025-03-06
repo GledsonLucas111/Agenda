@@ -11,4 +11,9 @@ export class AuthController {
   login(@Body() { email, password }: LoginRequestBody) {
     return this.authService.login(email, password);
   }
+
+  @Post('decoded')
+  decoded(@Body() { token }: any) {
+    return this.authService.decoded(token);
+  }
 }

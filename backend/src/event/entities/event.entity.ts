@@ -1,9 +1,8 @@
 import { Prisma } from '@prisma/client';
 
-export class Schedule implements Prisma.ScheduleUncheckedCreateInput {
-  id?: number;
+export class Event implements Prisma.EventUncheckedCreateInput {
   description: string;
   startDate: Date;
   endDate: Date;
-  userId?: number;
+  authorId?: number;
 }

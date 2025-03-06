@@ -13,6 +13,7 @@ export class UserService {
     try {
       const data: Prisma.UserCreateInput = {
         ...dto,
+        email: dto.email.toLowerCase(),
         password: await bcrypt.hash(dto.password, 10),
       };
       const createUser = await this.prisma.user.create({ data });

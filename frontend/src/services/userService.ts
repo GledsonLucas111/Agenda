@@ -10,6 +10,10 @@ export class UserService {
     }
 
     login(data: any){
-        return axiosInstance.post("login", data)
+        return axiosInstance.post("/login", data)
+    }
+
+    decoded(token: any){
+        return axiosInstance.post("/decoded", token)
     }
 }
