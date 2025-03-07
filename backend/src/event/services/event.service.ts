@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { PrismaService } from 'src/database/services/prisma.service';
@@ -9,6 +9,14 @@ export class EventService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateEventDto) {
+    if (
+      new Date(dto.startDate) > new Date(dto.endDate) ||
+      new Date(dto.startDate).getTime() === new Date(dto.endDate).getTime()
+    ) {
+      throw new BadRequestException(
+        'Data de incio nao pode ser menor ou exatamente igual a data de termino',
+      );
+    }
     try {
       const data: Prisma.EventCreateInput = {
         ...dto,

@@ -3,6 +3,7 @@
 import { UserService } from "@/services/userService";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,11 @@ export default function Login() {
         push("/home");
       })
       .catch((error) => {
-        console.log(error.response.data.message);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.response.data.message,
+        });
       });
     e.preventDefault();
   };

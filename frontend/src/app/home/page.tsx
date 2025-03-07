@@ -3,6 +3,7 @@
 import { EventService } from "@/services/eventService";
 import { UserService } from "@/services/userService";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 interface User {
   username: string;
@@ -10,13 +11,20 @@ interface User {
   iat: number;
   exp: number;
 }
+interface Event {
+  id: number;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  authorId: number;
+}
 
 export default function Home() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [startHour, setStartHour] = useState("");
   const [endHour, setEndHour] = useState("");
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [description, setDescription] = useState("");
@@ -52,7 +60,13 @@ export default function Home() {
     userService
       .decoded({ token: localStorage.getItem("token") })
       .then((response) => setUser(response.data))
-      .catch((error) => console.log(error))
+      .catch((error) =>
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.response.data.message,
+        })
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -61,24 +75,36 @@ export default function Home() {
     eventService
       .list(user.sub.toString())
       .then((response) => setEvents(response.data))
-      .catch((error) => console.log(error));
+      .catch((error) =>
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.response.data.message,
+        })
+      );
   }, [user]);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
-    eventService
-      .create({
-        description,
+    try {
+      const response = await eventService.create({
+        description: description,
         startDate: new Date(`${startDate}T${startHour}:00`),
         endDate: new Date(`${endDate}T${endHour}:00`),
         authorId: user.sub,
-      })
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error.message));
-  };
+      });
 
+      setEvents((prevEvents) => [...prevEvents, response.data]);
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.response.data.message,
+      });
+    }
+  };
   return (
     <div>
       <header className="p-7 mb-5 bg-blue-950">
@@ -107,18 +133,25 @@ export default function Home() {
                 authorId: number;
               }) => {
                 return (
-                  <div key={e.id} className="border mt-2 w-full">
+                  <div key={e.id} className="border mt-2 w-80">
                     <div>
-                      Descriçao: <p className="font-bold">{e.description}</p>
-                    </div>
-                    <div>
-                      Data de inicio:{" "}
-                      <p className="font-bold">{dateformatted(e.startDate)}</p>
-                    </div>
+                      <div>
+                        Descriçao:{" "}
+                        <p className="font-bold inline">{e.description}</p>
+                      </div>
+                      <div>
+                        Data de inicio:{" "}
+                        <p className="font-bold inline">
+                          {dateformatted(e.startDate)}
+                        </p>
+                      </div>
 
-                    <div>
-                      Data de termino:{" "}
-                      <p className="font-bold">{dateformatted(e.endDate)}</p>
+                      <div>
+                        Data de termino:{" "}
+                        <p className="font-bold inline">
+                          {dateformatted(e.endDate)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
@@ -131,7 +164,7 @@ export default function Home() {
         <h3 className="font-bold p-1 bg-blue-900 text-amber-50 active:bg-blue-950 w-full">
           Adicionar evento
         </h3>
-        <form className="flex flex-col mt-2 gap-3" onSubmit={onSubmit}>
+        <form className="flex flex-col mt-2 mb-10 gap-3" onSubmit={onSubmit}>
           <textarea
             onChange={handleInputChange(setDescription)}
             name="description"
