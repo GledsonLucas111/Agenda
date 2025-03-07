@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { PrismaService } from 'src/database/services/prisma.service';
@@ -32,14 +36,32 @@ export class EventService {
   }
 
   async findAll() {
-    return await this.prisma.event.findMany();
+    const result = await this.prisma.event.findMany();
+    if (result.length > 0) {
+      return result;
+    } else {
+      throw new NotFoundException('Nenhum evento encontrado');
+    }
   }
 
   findOne(id: number) {
-    return this.prisma.event.findMany({ where: { author: { id } } });
+    try {
+      return this.prisma.event.findMany({ where: { author: { id } } });
+    } catch (error: any) {
+      throw new BadRequestException(error);
+    }
   }
-
+  findEventById(id: number) {
+    return this.prisma.event.findUnique({ where: { id } });
+  }
   async update(id: number, updateDto: UpdateEventDto) {
+    const eventId = await this.findEventById(id);
+
+    if (!eventId) {
+      throw new BadRequestException(
+        'O evento com esse id informado nao existe',
+      );
+    }
     const data: Prisma.EventUpdateInput = {
       ...updateDto,
     };
@@ -49,7 +71,14 @@ export class EventService {
     });
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const eventId = await this.findEventById(id);
+
+    if (!eventId) {
+      throw new BadRequestException(
+        'O evento com esse id informado nao existe',
+      );
+    }
     return this.prisma.event.delete({ where: { id } });
   }
 }

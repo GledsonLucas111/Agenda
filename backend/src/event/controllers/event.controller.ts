@@ -8,7 +8,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { EventService } from '../services/event.service';
-import { UpdateEventDto } from '../dto/update-event.dto';
 
 @Controller('event')
 export class EventController {
@@ -38,7 +37,16 @@ export class EventController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+  update(
+    @Param('id') id: string,
+    @Body()
+    updateEventDto: {
+      description?: string;
+      startDate?: Date;
+      endDate?: Date;
+      authorId?: number;
+    },
+  ) {
     return this.eventService.update(+id, updateEventDto);
   }
 
